@@ -45,8 +45,11 @@ function SteeringAgent:updateLocalReference()
   end
 end
 
-function SteeringAgent:update(target,dt)
-  self.forceAccum = self.steering.seek(self,target)
+function SteeringAgent:update(target,dt)  
+  -- Using temporary a fixed behavior here,
+  -- Will provide later on a mechanism to combine them
+  self.forceAccum = self.steering.flee(self,target,100)
+  
   self:integrate(dt)
   self:updateLocalReference()
 end

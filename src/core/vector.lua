@@ -93,6 +93,12 @@ function Vec:getPerp()
   return Vec(-self.y,self.x)
 end
 
+function Vec:distSqTo(v)
+  local dx = v.x - self.x
+  local dy = v.y - self.y
+  return (dx * dx + dy * dy)
+end
+
 return setmetatable(Vec, 
   {__call = function(self,...) 
     return Vec:new(...) 

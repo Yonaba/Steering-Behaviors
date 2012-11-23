@@ -22,7 +22,7 @@
 --]]
 
 if (...) then
-local _PATH = (...):gsub('[^%.]+$','')
+  local _PATH = (...):gsub('[^%.]+$','')
   local Integrator = {}
 
   Integrator.forwardEuler    = require (_PATH .. '.integrators.explicitEuler')

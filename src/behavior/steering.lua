@@ -21,19 +21,34 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --]]
 
-local SteeringBehaviour = {}
-SteeringBehaviour.__index = SteeringBehaviour
+if (...) then
+  local _PATH = (...):match('%w+%.')
+  local Vec = require (_PATH .. 'core.vector')
 
-function SteeringBehaviour:new()
-  return setmetatable({},SteeringBehaviour)
-end
+  local SteeringBehaviour = {}
+  SteeringBehaviour.__index = SteeringBehaviour
 
-function SteeringBehaviour.seek(agent,target)
-  local requiredVel = (target.pos - agent.pos):normalize() * agent.maxVel
-  return requiredVel - agent.vel  
-end
+  function SteeringBehaviour:new()
+    return setmetatable({},SteeringBehaviour)
+  end
 
-return setmetatable(SteeringBehaviour, 
-  {__call = function(self,...) 
-    return SteeringBehaviour:new(...) 
-end})
+  function SteeringBehaviour.seek(agent,target)
+    local requiredVel = (target.pos - agent.pos):normalize() * agent.maxVel
+    return requiredVel - agent.vel  
+  end
+
+  function SteeringBehaviour.flee(agent,target, panicDistance)
+    if panicDistance then
+      if agent.pos:distSqTo(target.pos) < panicDistance * panicDistance then
+        local requiredVel = (agent.pos - target.pos):normalize() * agent.maxVel
+        return requiredVel - agent.vel     
+      end
+    end
+    return Vec()      
+  end
+
+  return setmetatable(SteeringBehaviour, 
+    {__call = function(self,...) 
+      return SteeringBehaviour:new(...) 
+  end})
+end  
