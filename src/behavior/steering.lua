@@ -29,15 +29,15 @@ if (...) then
   local min = math.min  
   local SteeringBehaviour = {}
 
-  function SteeringBehaviour.seek(agent,target)
-    local requiredVel = (target.pos - agent.pos):normalize() * agent.maxVel
+  function SteeringBehaviour.seek(agent,targetPos)
+    local requiredVel = (targetPos - agent.pos):normalize() * agent.maxVel
     return requiredVel - agent.vel  
   end
 
-  function SteeringBehaviour.flee(agent,target, panicDistance)
+  function SteeringBehaviour.flee(agent,targetPos, panicDistance)
     if panicDistance then
-      if agent.pos:distSqTo(target.pos) < panicDistance * panicDistance then
-        local requiredVel = (agent.pos - target.pos):normalize() * agent.maxVel
+      if agent.pos:distSqTo(targetPos) < panicDistance * panicDistance then
+        local requiredVel = (agent.pos - targetPos):normalize() * agent.maxVel
         return requiredVel - agent.vel     
       end
     end
@@ -45,8 +45,8 @@ if (...) then
   end
   
   local DecelerationType = {slow = 3, normal = 2, fast = 1}  
-  function SteeringBehaviour.arrive(agent, target, typeDec)
-    local vTarget = target.pos - agent.pos
+  function SteeringBehaviour.arrive(agent, targetPos, typeDec)
+    local vTarget = targetPos - agent.pos
     local distToTarget = vTarget:mag()
     if distToTarget > 0 then
       typeDec = typeDec or 'normal'
@@ -56,6 +56,16 @@ if (...) then
       return requiredVel - agent.vel
     end
     return Zero
+  end
+  
+  function SteeringBehaviour.pursuit(agent, runaway)
+    local vRunaway = runaway.pos - agent.pos
+    local relativeHeading = agent.velHeading:dot(runaway.velHeading)
+    if vRunaway:dot(agent.velHeading) > 0 and relativeHeading < -0.95 then
+      return SteeringBehaviour.seek(agent,runaway.pos)
+    end
+    local predictTime = vRunaway:mag()/(agent.maxVel:mag()+runaway.maxVel:mag())
+    return SteeringBehaviour.seek(agent,runaway.pos + runaway.vel*predictTime)
   end
   
   return SteeringBehaviour

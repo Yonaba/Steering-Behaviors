@@ -46,7 +46,7 @@ function SteeringAgent:updateLocalReference()
 end
 
 function SteeringAgent:update(target,dt)  
-  self.forceAccum = self.steering(self,target)  
+  self.forceAccum = self:steering(target)  
   self:integrate(dt)
   self:updateLocalReference()
 end

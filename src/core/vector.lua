@@ -99,6 +99,10 @@ function Vec:distSqTo(v)
   return (dx * dx + dy * dy)
 end
 
+function Vec:dot(v)
+  return (self.x * v.x + self.y * v.y)
+end  
+
 return setmetatable(Vec, 
   {__call = function(self,...) 
     return Vec:new(...) 
