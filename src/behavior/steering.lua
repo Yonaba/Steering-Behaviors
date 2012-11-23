@@ -64,8 +64,14 @@ if (...) then
     if vRunaway:dot(agent.velHeading) > 0 and relativeHeading < -0.95 then
       return SteeringBehaviour.seek(agent,runaway.pos)
     end
-    local predictTime = vRunaway:mag()/(agent.maxVel:mag()+runaway.maxVel:mag())
-    return SteeringBehaviour.seek(agent,runaway.pos + runaway.vel*predictTime)
+    local predictTime = vRunaway:mag()/(agent.maxVel:mag()+runaway.vel:mag())
+    return SteeringBehaviour.seek(agent,runaway.pos + runaway.vel * predictTime)
+  end
+  
+  function SteeringBehaviour.evade(agent,hunter)
+    local vHunter = hunter.pos - agent.pos
+    local predictTime = vHunter:mag()/(agent.maxVel:mag() + hunter.vel:mag())    
+    return SteeringBehaviour.flee(agent, hunter.pos + hunter.vel * predictTime,100)
   end
   
   return SteeringBehaviour
