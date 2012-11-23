@@ -26,15 +26,15 @@ local Agent = require 'src.agent.agent'
 local SteeringBehaviour = require 'src.behavior.steering'
 
 local SteeringAgent = Agent()
-SteeringAgent.steering = SteeringBehaviour()
+SteeringAgent.steering = SteeringBehaviour.seek --// Default behavior ?
 SteeringAgent.minVelMagSq = 1e-4
 SteeringAgent.velHeading = Vec()
 SteeringAgent.velPerp = Vec()
 
 SteeringAgent.__index = SteeringAgent
 
-function SteeringAgent:new()
-  local newSteeringAgent = {}
+function SteeringAgent:new(behavior)
+  local newSteeringAgent = {steering = behavior}
   return setmetatable(newSteeringAgent,SteeringAgent)
 end
 
@@ -46,10 +46,7 @@ function SteeringAgent:updateLocalReference()
 end
 
 function SteeringAgent:update(target,dt)  
-  -- Using temporary a fixed behavior here,
-  -- Will provide later on a mechanism to combine them
-  self.forceAccum = self.steering.flee(self,target,100)
-  
+  self.forceAccum = self.steering(self,target)  
   self:integrate(dt)
   self:updateLocalReference()
 end

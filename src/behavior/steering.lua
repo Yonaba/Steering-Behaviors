@@ -24,13 +24,10 @@
 if (...) then
   local _PATH = (...):match('%w+%.')
   local Vec = require (_PATH .. 'core.vector')
-
+  local Zero = Vec()
+  
+  local min = math.min  
   local SteeringBehaviour = {}
-  SteeringBehaviour.__index = SteeringBehaviour
-
-  function SteeringBehaviour:new()
-    return setmetatable({},SteeringBehaviour)
-  end
 
   function SteeringBehaviour.seek(agent,target)
     local requiredVel = (target.pos - agent.pos):normalize() * agent.maxVel
@@ -44,11 +41,22 @@ if (...) then
         return requiredVel - agent.vel     
       end
     end
-    return Vec()      
+    return Zero   
   end
-
-  return setmetatable(SteeringBehaviour, 
-    {__call = function(self,...) 
-      return SteeringBehaviour:new(...) 
-  end})
+  
+  local DecelerationType = {slow = 3, normal = 2, fast = 1}  
+  function SteeringBehaviour.arrive(agent, target, typeDec)
+    local vTarget = target.pos - agent.pos
+    local distToTarget = vTarget:mag()
+    if distToTarget > 0 then
+      typeDec = typeDec or 'normal'
+      local vel = distToTarget/DecelerationType[typeDec]
+      vel = min(vel, agent.maxVel:mag())
+      local requiredVel = vTarget * (vel/distToTarget)
+      return requiredVel - agent.vel
+    end
+    return Zero
+  end
+  
+  return SteeringBehaviour
 end  
