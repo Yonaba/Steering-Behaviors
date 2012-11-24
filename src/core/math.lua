@@ -21,38 +21,21 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --]]
 
-local Vec = require 'src.core.vector'
-local Agent = require 'src.agent.agent'
-local SteeringBehaviour = require 'src.behavior.steering'
-
-local SteeringAgent = Agent()
-SteeringAgent.steering = SteeringBehaviour.seek --// Default behavior ?
-SteeringAgent.minVelMagSq = 1e-4
-SteeringAgent.velHeading = Vec()
-SteeringAgent.velPerp = Vec()
-
-SteeringAgent.__index = SteeringAgent
-
-function SteeringAgent:new(behavior)
-  local newSteeringAgent = {steering = behavior}
-  return setmetatable(newSteeringAgent,SteeringAgent)
-end
-
-function SteeringAgent:updateLocalReference()
-  if self.vel:magSq() > self.minVelMagSq then
-    self.velHeading = self.vel:getNormalized()
-    self.velPerp = self.velHeading:getPerp()
+if (...) then
+  local _PATH = (...):gsub('[^%.]+$','')
+  local Matrix = require(_PATH .. 'matrix')
+  local random = math.random
+  function math.localToAbsoluteReference(point, heading, perp, position)
+    return Matrix()
+      :rotateFrom(heading, perp)
+      :translate(position.x, position.y)
+      :transformVec(point)
   end
+  
+  function math.randomSign()
+    return random()>0.5 and 1 or -1
+  end
+  
+  math.tau = 2 * math.pi
+  
 end
-
-function SteeringAgent:update(...)
-  self.forceAccum = self:steering(...)
-  self:integrate(self.dt)
-  self:updateLocalReference()
-end
-
-getmetatable(SteeringAgent)
-  .__call = function(self,...) 
-    return SteeringAgent:new(...) 
-end
-return SteeringAgent

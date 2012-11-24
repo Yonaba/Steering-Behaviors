@@ -23,10 +23,14 @@
 
 if (...) then
   local _PATH = (...):match('%w+%.')
+  require (_PATH .. 'core.math')
   local Vec = require (_PATH .. 'core.vector')
+  
   local Zero = Vec()
   
-  local min = math.min  
+  local min, random, cos, sin, tau = math.min, math.random, math.cos, math.sin, math.tau
+  local l2Abs, rSign = math.localToAbsoluteReference, math.randomSign
+  
   local SteeringBehaviour = {}
 
   function SteeringBehaviour.seek(agent,targetPos)
@@ -72,6 +76,29 @@ if (...) then
     local vHunter = hunter.pos - agent.pos
     local predictTime = vHunter:mag()/(agent.maxVel:mag() + hunter.vel:mag())    
     return SteeringBehaviour.flee(agent, hunter.pos + hunter.vel * predictTime,100)
+  end
+  
+  function SteeringBehaviour.wander(agent, radius, distance, jitter)
+    local jitterThisFrame = jitter * agent.dt
+    local theta = random() * tau
+    local targetPos = Vec(radius * cos(theta), radius * sin(theta))
+    targetPos = targetPos + Vec((random()*rSign() * jitterThisFrame),
+                                (random()*rSign() * jitterThisFrame))    
+    targetPos:normalize()
+    targetPos = targetPos * radius
+    local targetAtDist = targetPos + Vec(distance,0)
+       
+    local newTargetPos = l2Abs(targetAtDist, agent.velHeading, agent.velPerp, agent.pos)
+    --[[
+    print('agentVelH', agent.velHeading)
+    print('agentVelPerp', agent.velPerp)
+    print('agentpos', agent.pos)
+    print('newTargetPos', newTargetPos)
+    --io.read()
+    --]]
+    return newTargetPos - agent.pos
+    
+  
   end
   
   return SteeringBehaviour
